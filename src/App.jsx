@@ -1,35 +1,65 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import ContactForm from "./components/ContactForm/ContactForm";
+import SearchBox from "./components/SearchBox/SearchBox";
+import Contact from "./components/Contact/Contact";
+import Contacts from "./assets/list";
+import { nanoid } from "nanoid";
+import "./App.css";
+import { useState, useEffect } from "react";
+import { Formik, Form, FieldArray } from "formik";
+import ContactList from "./components/ContactList/ContactList";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [filter, setFilter] = useState("");
+  const [filteredArray, setFilteredArray] = useState(Contacts);
+  const [contacts, setContacts] = useState(Contacts);
+
+  useEffect(() => {
+    setFilteredArray((_) => {
+      return filter;
+    });
+  }, [filter]);
+
+  useEffect(() => {
+    if (contacts !== null) setContacts(Contacts);
+  }, []);
+
+  function filterHandle(e) {
+    setFilter(e.target.value.toLowerCase());
+  }
+  const handleAdd = (values) => {
+    setContacts([
+      ...contacts,
+      { id: nanoid(), name: values.name, number: values.number },
+    ]);
+  };
+  const handleDelete = (e) => {
+
+    setContacts(contacts.filter((c) => c.id !== e.target.id));
+  };
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <div>
+      <h1>Phonebook</h1>
+      <ContactForm onAdd={handleAdd} />
+      <SearchBox filter={filter} onFilter={filterHandle} />
+      
+      <Formik initialValues={filteredArray}>
+        <Form className="form">
+          {contacts
+            .filter((c) => c.name.toLowerCase().includes(filter))
+            .map(({ id, name, number}) => (
+              <Contact
+                key={id}
+                name={name}
+                number={number}
+                onDelete={handleDelete}
+                id={id}
+              />
+            ))}
+        </Form>
+      </Formik>
+    </div>
+  );
 }
 
-export default App
+export default App;
