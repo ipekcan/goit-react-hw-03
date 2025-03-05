@@ -13,6 +13,8 @@ function App() {
   const [filteredArray, setFilteredArray] = useState(Contacts);
   const [contacts, setContacts] = useState(Contacts);
 
+  const dataContacts = JSON.parse(localStorage.getItem("contacts"));
+
   useEffect(() => {
     setFilteredArray((_) => {
       return filter;
@@ -20,8 +22,12 @@ function App() {
   }, [filter]);
 
   useEffect(() => {
-    if (contacts !== null) setContacts(Contacts);
+    if (dataContacts !== null) setContacts(dataContacts);
   }, []);
+  
+  useEffect(() => {
+    localStorage.setItem("contacts", JSON.stringify(contacts));
+  }, [contacts]);
 
   function filterHandle(e) {
     setFilter(e.target.value.toLowerCase());
